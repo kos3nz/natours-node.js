@@ -1,0 +1,23 @@
+/* eslint-disable */
+
+export const hideAlert = () => {
+  const el = document.querySelector('.alert');
+  if (el) el.parentElement.removeChild(el);
+};
+
+// type is 'success' or 'error'
+export const showAlert = (type, msg) => {
+  hideAlert();
+
+  const markup = `<div class='alert alert--${type}'>${msg}</div>`;
+  document
+    .querySelector('body')
+    .insertAdjacentHTML('afterbegin', markup);
+  // inside of the body element, but right at the beginning
+
+  window.setTimeout(hideAlert, 5000);
+  // window.setTimeout(() => {
+  //   hideAlert();
+  // }, 5000);
+  // だと何故か動作しない
+};
