@@ -5,9 +5,10 @@ require('dotenv').config({
 });
 const mongoose = require('mongoose');
 
+// eslint-disable-next-line no-unused-vars
 process.on('uncaughtException', (err) => {
   console.log(err.name, err.message);
-  console.log('UNCAUGHT EXEPTION! Shutting down...');
+  console.log('UNCAUGHT EXEPTION! 💥 Shutting down...');
   process.exit(1);
 });
 /*
@@ -52,9 +53,10 @@ const server = app.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });
 
+// eslint-disable-next-line no-unused-vars
 process.on('unhandledRejection', (err) => {
   console.log(err.name, err.message);
-  console.log('UNHANDLER REJECTION! Shutting down...');
+  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
   // server.close() gives some time to the server to finish all the request that are still pending or being handled at the time, and only after that the server is basically killed.
   server.close(() => {
     process.exit(1);

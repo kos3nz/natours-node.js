@@ -7,6 +7,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -101,6 +102,10 @@ app.use(
 // requestQueryが{ sort: 'duration,-price' }ではなく
 // {sort: ['duration', '-price']}でarrayをpassするためエラーになる
 // hpp()を使うことで{ sort: '-price'}にできる
+
+//:: Compress all the text that is sent to clients
+// since images(= jpegs) are already compressed, this middleware won't work for them. only works for texts.
+app.use(compression());
 
 //:: Test middleware
 app.use((req, res, next) => {

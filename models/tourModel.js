@@ -41,8 +41,7 @@ const tourSchema = new mongoose.Schema(
       enum: {
         // validator for String type
         values: ['easy', 'medium', 'difficult'],
-        message:
-          'Difficulty is either: easy, medium, or difficult',
+        message: 'Difficulty is either: easy, medium, or difficult',
       },
     },
     price: {
@@ -58,8 +57,7 @@ const tourSchema = new mongoose.Schema(
           return val <= this.price;
         },
         // ({VALUE}) is mongoose internal syntax which accept the argument value from the function
-        message:
-          'Discount price ({VALUE}) should be below the regular price',
+        message: 'Discount price ({VALUE}) should be below the regular price',
       },
       // -- there is a library called 'validator.js' which takes care of this kind of custom validator and I don't have to write one myself
       // https://github.com/validatorjs/validator.js/
@@ -222,13 +220,13 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
-tourSchema.post(/^find/, function (docs, next) {
-  console.log(
-    `Query took ${Date.now() - this.start} milliseconds`
-  );
-  // console.log(docs);
-  next();
-});
+// tourSchema.post(/^find/, function (docs, next) {
+//   console.log(
+//     `Query took ${Date.now() - this.start} milliseconds`
+//   );
+//   // console.log(docs);
+//   next();
+// });
 
 //## ============= AGGREGATION MIDDLEWARE ============= ##//
 //-- 'this' points to Aggregation Object

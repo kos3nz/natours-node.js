@@ -20,10 +20,7 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Please tell us your email'],
     unique: true,
     lowercase: true,
-    validate: [
-      validator.isEmail,
-      'Please provide a valid email',
-    ],
+    validate: [validator.isEmail, 'Please provide a valid email'],
   },
   photo: {
     type: String,
@@ -37,10 +34,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Please provide a password'],
-    minlength: [
-      8,
-      'Password needs at least 8 or more characters',
-    ],
+    minlength: [8, 'Password needs at least 8 or more characters'],
     select: false, // removed from the output
   },
   passwordConfirm: {
@@ -86,13 +80,12 @@ userSchema.pre('save', async function (next) {
 //:: =============== Update changedPasswordAt when save() runs =============== :://
 
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password') || this.isNew)
-    return next();
+  if (!this.isModified('password') || this.isNew) return next();
 
   // sometimes JWT issued 'before' assigning to this.passwordChangedAt, so just to make sure subtract 1 second.
   this.passwordChangedAt = Date.now() - 1000;
 
-  console.log(this.passwordChangedAt);
+  // console.log(this.passwordChangedAt);
 
   next();
 });
@@ -100,10 +93,8 @@ userSchema.pre('save', async function (next) {
 //:: =============== Check Password =============== :://
 
 // create instance method
-userSchema.methods.correctPassword = async (
-  candidatePassword,
-  userPassword
-) => await bcrypt.compare(candidatePassword, userPassword);
+userSchema.methods.correctPassword = async (candidatePassword, userPassword) =>
+  await bcrypt.compare(candidatePassword, userPassword);
 // candidatePassword = the password passed from user input (not hashed)
 // userPassword = the hashed password
 // without compare() function there is no way to compare them
@@ -113,9 +104,7 @@ userSchema.methods.correctPassword = async (
 
 // WARNING: thisを使うのでarrow functionは使えない
 // this keyword in the instance always points to the Document
-userSchema.methods.changedPasswordAfter = function (
-  JWTTimestamp
-) {
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
       this.passwordChangedAt.getTime() / 1000,
@@ -150,11 +139,11 @@ userSchema.methods.createPasswordResetToken = function () {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
   // Expires in 10min
 
-  console.log({
-    resetToken,
-    passwordResetToken: this.passwordResetToken,
-    passwordResetExpires: this.passwordResetExpires,
-  });
+  // console.log({
+  //   resetToken,
+  //   passwordResetToken: this.passwordResetToken,
+  //   passwordResetExpires: this.passwordResetExpires,
+  // });
 
   // I need to send one token via email, and set the encrypted version in the database
   // NOTE: databaseにsensitive dataを保管するときは必ずencryptする必要がある

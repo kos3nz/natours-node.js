@@ -31,10 +31,7 @@ const multerDiskStorage = multer.diskStorage({
     // user-(user.id)-(timestamp).jpegの形式で保存したい
     // user-767767v7a7v7ba-3421847273.jpeg
     const extension = file.mimetype.split('/')[1]; // jpeg
-    cb(
-      null,
-      `user-${req.user.id}-${Date.now()}.${extension}`
-    );
+    cb(null, `user-${req.user.id}-${Date.now()}.${extension}`);
   },
 });
 
@@ -49,13 +46,7 @@ const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image')) {
     cb(null, true);
   } else {
-    cb(
-      new AppError(
-        'Not an image! Please upload only images.',
-        400
-      ),
-      false
-    );
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
   }
 };
 
@@ -70,26 +61,22 @@ const upload = multer({
 const uploadUserPhoto = upload.single('photo');
 // update one single image, and the name of the field that is going to hold the image to upload
 
-const resizeUserPhoto = catchAsync(
-  async (req, res, next) => {
-    if (!req.file) return next();
+const resizeUserPhoto = catchAsync(async (req, res, next) => {
+  if (!req.file) return next();
 
-    // multerMemoryStorageを使用するため、req.file.filenameがundefinedのままなのでここでassign
-    req.file.filename = `user-${
-      req.user.id
-    }-${Date.now()}.jpeg`;
+  // multerMemoryStorageを使用するため、req.file.filenameがundefinedのままなのでここでassign
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
 
-    // multer.memoryStorage()を使うことでbuffer propertyにアクセスできる
-    await sharp(req.file.buffer)
-      .resize(500, 500)
-      .toFormat('jpeg')
-      .jpeg({ quality: 90 })
-      .toFile(`public/img/users/${req.file.filename}`);
-    // https://sharp.pixelplumbing.com/api-resize
+  // multer.memoryStorage()を使うことでbuffer propertyにアクセスできる
+  await sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`);
+  // https://sharp.pixelplumbing.com/api-resize
 
-    next();
-  }
-);
+  next();
+});
 
 //:: =============== Helper function =============== :://
 
@@ -118,8 +105,7 @@ const getMe = (req, res, next) => {
 const createUser = (req, res) => {
   res.status(500).json({
     status: 'Error',
-    message:
-      'This route is not yet defined! Please use /signup instead.',
+    message: 'This route is not yet defined! Please use /signup instead.',
   });
 };
 
@@ -150,14 +136,10 @@ const updateMe = catchAsync(async (req, res, next) => {
   if (req.file) filteredBody.photo = req.file.filename;
 
   // 3) Update user document
-  const updatedUser = await User.findByIdAndUpdate(
-    req.user.id,
-    filteredBody,
-    {
-      new: true, // return new(= updated) Document
-      runValidators: true,
-    }
-  );
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+    new: true, // return new(= updated) Document
+    runValidators: true,
+  });
 
   res.status(200).json({
     status: 'success',

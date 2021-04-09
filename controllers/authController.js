@@ -59,7 +59,6 @@ const signup = catchAsync(async (req, res, next) => {
   });
   const url = `${req.protocol}://${req.get('host')}/me`;
   // req.protocol = 'http' | 'https', req.get('host') = 'localhost:8080' | 'www.natours.io'
-  console.log(url);
 
   await new Email(newUser, url).sendWelcome();
 
