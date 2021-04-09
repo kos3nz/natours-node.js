@@ -16,6 +16,7 @@ const viewRouter = require('./routes/viewRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
+//:: =============== Start Express App =============== :://
 const app = express();
 
 //:: =========== Setting up Pug Engine =========== :://
