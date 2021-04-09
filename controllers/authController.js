@@ -13,7 +13,7 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
 
   const cookieOptions = {
@@ -21,17 +21,16 @@ const createSendToken = (user, statusCode, res) => {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
-    //:: secure: true,
-    // the cookie will only be sent on an encrypted connection (= https)
-    httpOnly: true,
     // the cookie cannot be accessed or modified in any way by the browser
+    httpOnly: true,
+    // the cookie will only be sent on an encrypted connection (= https)
+    // express has secure property on req
+    // test ['x-forwarded-proto'] for Heroku server
+    // app.js で app.enable(...) することで ['x=forwarded=proto'] がセットされる
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
   };
 
-  if (process.env.NODE_ENV === 'production') {
-    cookieOptions.secure = true;
-  }
-
-  res.cookie('jwt', token, cookieOptions);
+  cookieOptions.res.cookie('jwt', token, cookieOptions);
 
   // Remove password from output
   user.password = undefined;
@@ -62,7 +61,7 @@ const signup = catchAsync(async (req, res, next) => {
 
   await new Email(newUser, url).sendWelcome();
 
-  createSendToken(newUser, 201, res);
+  createSendToken(newUser, 201, req, res);
 });
 
 //:: =============== Log in =============== :://
@@ -94,7 +93,7 @@ const login = catchAsync(async (req, res, next) => {
   }
 
   // 3) If everything is ok, send token to client
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 const logout = (req, res) => {
@@ -304,7 +303,7 @@ const resetPassword = catchAsync(async (req, res, next) => {
   // managed by the userSchema.pre('save')
 
   // 4) Log the user in , send JWT
-  createSendToken(user, 201, res);
+  createSendToken(user, 201, req, res);
 });
 
 //:: =============== Check Password =============== :://
@@ -326,7 +325,7 @@ const updatePassword = catchAsync(async (req, res, next) => {
   // User.findByIdAndUpdate() will NOT work as intended
 
   // 4) Log user in, send JWT
-  createSendToken(user, 201, res);
+  createSendToken(user, 201, req, res);
 });
 
 module.exports = {

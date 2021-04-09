@@ -20,6 +20,9 @@ const globalErrorHandler = require('./controllers/errorController');
 //:: =============== Start Express App =============== :://
 const app = express();
 
+//:: =============== Setting up Proxy for Heroku server =============== :://
+app.enable('trust proxy');
+
 //:: =========== Setting up Pug Engine =========== :://
 // express supports view engines like pug out of the box
 app.set('view engine', 'pug');
