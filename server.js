@@ -80,7 +80,7 @@ process.on('SIGTERM', () => {
   console.log('👏 SIGTERM received. Shutting down gracefully...');
   // handle the currently pending request before closing the server -> avoid abrupt shut down
   server.close(() => {
-    ('💥 Process terminated!');
+    console.log('💥 Process terminated!');
   });
   // do not need process.exit() manually because SIGTERM itself will cause the application to shut down
 });
