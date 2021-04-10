@@ -10,28 +10,31 @@ const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const cors = require('cors');
 
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
+const bookingController = require('./controllers/bookingController');
 const viewRouter = require('./routes/viewRoutes');
-const AppError = require('./utils/appError');
-const globalErrorHandler = require('./controllers/errorController');
 
 //:: =============== Start Express App =============== :://
 const app = express();
 
-//:: =============== Setting up Proxy for Heroku server =============== :://
+//:: ============ Global Middleware ============ :://
+
+//:: Setting up Proxy for Heroku server
 app.enable('trust proxy');
 
-//:: =========== Setting up Pug Engine =========== :://
+//:: Setting up Pug Engine
 // express supports view engines like pug out of the box
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 // path.join() always create a right path
 // same as `${__dirname}/views`
 
-//:: =========== Implement CORS (= Cross-Origin Resource Sharing) =========== :://
+//:: Implement CORS (= Cross-Origin Resource Sharing)
 app.use(cors());
 // Access-Control-Allow-Origin *
 // allows all the request no matter where they are coming from
@@ -48,8 +51,6 @@ app.use(
 
 app.options('*', cors());
 // app.options('/api/v1/tours/:id', cors());
-
-//:: ============ Global Middleware ============ :://
 
 //:: Serving static files
 // app.use(express.static(`${__dirname}/public`));
@@ -83,6 +84,14 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again in an hour!',
 });
 app.use('/api', limiter);
+
+//:: Stripe Webhook
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout
+);
+// Stripe function が req.body は json ではなく raw format である必要があるため body parser の前に置く
 
 //:: Body parser, reading data from body into req.body
 // NOTE: req.body にアクセスするために middleware が必要

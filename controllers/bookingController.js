@@ -1,5 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Tour = require('../models/tourModel');
+const User = require('../models/userModel');
 const Booking = require('../models/bookingModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
@@ -12,9 +13,10 @@ const getCheckoutSession = catchAsync(async (req, res, next) => {
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     // credit card
-    success_url: `${req.protocol}://${req.get('host')}/?tour=${
-      req.params.tourId
-    }&user=${req.user.id}&price=${tour.price}`,
+    /*
+    success_url: `${req.protocol}://${req.get('host')}/my-tours/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
+    */
+    success_url: `${req.protocol}://${req.get('host')}/my-tours`,
     // url redirected to as soon as a payment was completed
     cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
     // url redirected to if a user choose to cancel the payment
@@ -42,6 +44,7 @@ const getCheckoutSession = catchAsync(async (req, res, next) => {
 });
 
 // WARNING: This is only TEMPORARY, because it's : everyone can make bookings without paying
+/*
 const createBookingCheckout = catchAsync(async (req, res, next) => {
   const { tour, user, price } = req.query;
 
@@ -54,6 +57,36 @@ const createBookingCheckout = catchAsync(async (req, res, next) => {
   res.redirect(req.originalUrl.split('?')[0]);
   // `/?tour=${ req.params.tourId }&user=${req.user.id}&price=${tour.price}` -> '/'
 });
+*/
+
+async function createBookingCheckout(session) {
+  const tourId = session.client_reference_id;
+  const userId = (await User.findOne({ email: session.customer_email })).id;
+  const price = session.line_items[0].amount / 100;
+
+  await Booking.create({ tour: tourId, user: userId, price });
+}
+
+const webhookCheckout = (req, res, next) => {
+  const signature = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (error) {
+    return res.status(400).send(`Webhook error: ${error.message}`);
+    // Stripe will receive this response
+  }
+
+  if (event.type === 'checkout.session.completed')
+    createBookingCheckout(event.data.object);
+
+  res.status(200).json({ received: true });
+};
 
 //## =============== CREATE =============== ##//
 const createBooking = factory.createOne(Booking);
@@ -71,7 +104,8 @@ const deleteBooking = factory.deleteOne(Booking);
 //## =============== EXPORT =============== ##//
 module.exports = {
   getCheckoutSession,
-  createBookingCheckout,
+  // createBookingCheckout,
+  webhookCheckout,
   createBooking,
   getAllBookings,
   getBooking,
