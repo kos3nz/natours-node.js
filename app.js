@@ -8,6 +8,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const cors = require('cors');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -30,7 +31,26 @@ app.set('views', path.join(__dirname, 'views'));
 // path.join() always create a right path
 // same as `${__dirname}/views`
 
+//:: =========== Implement CORS (= Cross-Origin Resource Sharing) =========== :://
+app.use(cors());
+// Access-Control-Allow-Origin *
+// allows all the request no matter where they are coming from
+
+// natours.com -> api.natours.com
+/*
+app.use(
+  cors({
+    origin: 'https://www.natours.com',
+  })
+);
+*/
+// allows requests only from origin url to api.natours.tom
+
+app.options('*', cors());
+// app.options('/api/v1/tours/:id', cors());
+
 //:: ============ Global Middleware ============ :://
+
 //:: Serving static files
 // app.use(express.static(`${__dirname}/public`));
 app.use(express.static(path.join(__dirname, 'public')));
