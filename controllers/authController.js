@@ -30,7 +30,7 @@ const createSendToken = (user, statusCode, req, res) => {
     secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
   };
 
-  cookieOptions.res.cookie('jwt', token, cookieOptions);
+  res.cookie('jwt', token, cookieOptions);
 
   // Remove password from output
   user.password = undefined;
