@@ -55,6 +55,13 @@ const server = app.listen(port, () => {
 
 //:: =============== Error Handling =============== :://
 
+/*
+## 'unhandledRejection'
+-- handle all the promise rejection in the process
+-- unhandledRejectionはPromiseがrejectされた時にいつでも発行される。
+-- 普通はpromise.catch()とかasync/awaitだとtry-catchでキャッチされるが、どこにもキャッチされなかった場合に呼ばれる。
+-- どのpromiseでrejectされたのかを追跡する（try-catchを入れ忘れている箇所の特定）のに役立つ。
+*/
 // eslint-disable-next-line no-unused-vars
 process.on('unhandledRejection', (err) => {
   console.log(err.name, err.message);
@@ -65,17 +72,13 @@ process.on('unhandledRejection', (err) => {
     // 0 = success , 1 = uncaught exception
   });
 });
-/*
-## 'unhandledRejection'
--- handle all the promise rejection in the process
--- unhandledRejectionはPromiseがrejectされた時にいつでも発行される。
--- 普通はpromise.catch()とかasync/awaitだとtry-catchでキャッチされるが、どこにもキャッチされなかった場合に呼ばれる。
--- どのpromiseでrejectされたのかを追跡する（try-catchを入れ忘れている箇所の特定）のに役立つ。
-*/
 
-// config for Heroku server
-// Heroku server shuts down the application every 24 hours by sending a signal.
-// SIGTERM is a signal that is used to cause a program to stop running.
+/*
+## 'SIGTERM'
+-- config for Heroku server
+-- Heroku server shuts down the application every 24 hours by sending a signal.
+-- SIGTERM is a signal that is used to cause a program to stop running.
+*/
 process.on('SIGTERM', () => {
   console.log('👏 SIGTERM received. Shutting down gracefully...');
   // handle the currently pending request before closing the server -> avoid abrupt shut down
