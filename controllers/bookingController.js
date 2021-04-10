@@ -16,13 +16,12 @@ const getCheckoutSession = catchAsync(async (req, res, next) => {
     /*
     success_url: `${req.protocol}://${req.get('host')}/my-tours/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
     */
-    success_url: `${req.protocol}://${req.get('host')}/my-tours`,
+    success_url: `${req.protocol}://${req.get('host')}/my-tours?alert=booking`,
     // url redirected to as soon as a payment was completed
     cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
     // url redirected to if a user choose to cancel the payment
     customer_email: req.user.email,
-    client_reference_id: req.params.tourId,
-    // custom field
+    client_reference_id: req.params.tourId, // custom field
     line_items: [
       {
         // all these field names here, they come from Stripe so I cannot make up my own fields
@@ -37,6 +36,31 @@ const getCheckoutSession = catchAsync(async (req, res, next) => {
       },
     ],
   });
+
+  /* Another way of defining session
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    success_url: `${req.protocol}://${req.get('host')}/my-tours`,
+    cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
+    customer_email: req.user.email,
+    client_reference_id: req.params.tourId,
+    mode: 'payment',
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: 'usd',
+          unit_amount: tour.price * 100,
+          product_data: {
+            name: `${tour.name} Tour`,
+            description: tour.summary,
+            images: [`${req.protocol}://${req.get('host')}/img/tours/${tour.imageCover}`],
+          },
+        },
+      },
+    ],
+  });
+  */
 
   // 3) Create session as response
   res.status(200).json({

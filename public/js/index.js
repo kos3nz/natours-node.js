@@ -4,6 +4,7 @@ import { displayMap } from './mapbox';
 import { login, logout } from './login';
 import { updateSettings } from './updateSettings';
 import { bookTour } from './stripe';
+import { showAlert } from './alert';
 
 //:: =============== DOM ELEMENT =============== :://
 const mapbox = document.getElementById('map');
@@ -92,6 +93,11 @@ if (bookBtn) {
     bookTour(tourId);
   });
 }
+
+//:: =============== Alert Message =============== :://
+
+const alertMessage = document.querySelector('body').dataset.alert;
+if (alertMessage) showAlert('success', alertMessage, 20);
 
 /* ==============================
 NOTE:= DevTools failed to load SourceMap: Could not load content for http://localhost:8080/bundle.js.map: HTTP error: status code 404, net::ERR_HTTP_RESPONSE_CODE_FAILURE について

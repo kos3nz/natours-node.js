@@ -10,7 +10,7 @@ html(lang="en")
       link(href="/css/style.css", rel="stylesheet")
       link(href="/img/favicon.png", rel="shortcut icon", type="image/png")
 
-  body
+  body(data-alert=`${alert ? alert : ''}`)
     // HEADER
     include _header
 
