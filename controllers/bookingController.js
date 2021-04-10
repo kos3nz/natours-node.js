@@ -28,7 +28,9 @@ const getCheckoutSession = catchAsync(async (req, res, next) => {
         // all these field names here, they come from Stripe so I cannot make up my own fields
         name: `${tour.name} Tour`,
         description: tour.summary,
-        images: [`https://www.natours.dev/img/tours/${tour.imageCover}`],
+        images: [
+          `${req.protocol}://${req.get('host')}/img/tours/${tour.imageCover}`,
+        ],
         amount: tour.price * 100, // expected in cents
         currency: 'usd',
         quantity: 1,
@@ -62,7 +64,7 @@ const createBookingCheckout = catchAsync(async (req, res, next) => {
 async function createBookingCheckout(session) {
   const tourId = session.client_reference_id;
   const userId = (await User.findOne({ email: session.customer_email })).id;
-  const price = session.line_items[0].amount / 100;
+  const price = session.amount_total / 100;
 
   await Booking.create({ tour: tourId, user: userId, price });
 }
